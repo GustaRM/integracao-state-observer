@@ -1,0 +1,40 @@
+digraph UML {
+  rankdir=TB; nodesep=0.5; ranksep=0.7;
+  node [shape=record, fontname="Helvetica", fontsize=11, style=filled, fillcolor="#FFFFFF"];
+  edge [fontname="Helvetica", fontsize=10];
+
+  Processo [label="{Processo\n(Context + Subject)|- numero : String\l- estado : ProcessoEstado\l- observadores : List\<ProcessoObserver\>\l|+ adicionarObservador(o)\l+ removerObservador(o)\l- notificarObservadores(ant, novo)\l~ setEstado(novoEstado)\l+ distribuir() : boolean\l+ suspender() : boolean\l+ retomar() : boolean\l+ julgar() : boolean\l+ recorrer() : boolean\l+ arquivar() : boolean\l+ getNomeEstado() : String\l}", fillcolor="#FFF8DC"];
+
+  ProcessoEstado [label="{«abstract»\nProcessoEstado|+ getEstado() : String\l+ distribuir(p) : boolean\l+ suspender(p) : boolean\l+ retomar(p) : boolean\l+ julgar(p) : boolean\l+ recorrer(p) : boolean\l+ arquivar(p) : boolean\l}", fillcolor="#E6F2FF"];
+
+  Protocolado [label="{ProcessoEstadoProtocolado|+ getInstance()\l+ distribuir(p)\l}", fillcolor="#E6F2FF"];
+  EmAndamento [label="{ProcessoEstadoEmAndamento|+ getInstance()\l+ suspender(p)\l+ julgar(p)\l}", fillcolor="#E6F2FF"];
+  Suspenso    [label="{ProcessoEstadoSuspenso|+ getInstance()\l+ retomar(p)\l}", fillcolor="#E6F2FF"];
+  Julgado     [label="{ProcessoEstadoJulgado|+ getInstance()\l+ recorrer(p)\l+ arquivar(p)\l}", fillcolor="#E6F2FF"];
+  Arquivado   [label="{ProcessoEstadoArquivado|+ getInstance()\l}", fillcolor="#E6F2FF"];
+
+  ProcessoObserver [label="{«interface»\nProcessoObserver||+ atualizar(processo, estadoAnterior, estadoNovo)\l}", fillcolor="#E8F8E8"];
+  Advogado [label="{Advogado|- nome : String\l- notificacoes : List\<String\>\l|+ atualizar(...)\l+ getNotificacoes()\l}", fillcolor="#E8F8E8"];
+  Parte [label="{Parte|- nome : String\l- notificacoes : List\<String\>\l|+ atualizar(...)\l+ getNotificacoes()\l}", fillcolor="#E8F8E8"];
+  RegistroAuditoria [label="{RegistroAuditoria|- nome : String\l- notificacoes : List\<String\>\l|+ atualizar(...)\l+ getNotificacoes()\l}", fillcolor="#E8F8E8"];
+
+  // Processo -> estado atual (State)
+  Processo -> ProcessoEstado [arrowhead=vee, taillabel="1", headlabel="estado", labeldistance=2];
+  // herança estados
+  edge [arrowhead=empty];
+  Protocolado -> ProcessoEstado;
+  EmAndamento -> ProcessoEstado;
+  Suspenso -> ProcessoEstado;
+  Julgado -> ProcessoEstado;
+  Arquivado -> ProcessoEstado;
+
+  // Observer
+  Processo -> ProcessoObserver [arrowhead=vee, taillabel="1", headlabel="0..*  observadores", labeldistance=2.5];
+  edge [arrowhead=empty, style=dashed];
+  Advogado -> ProcessoObserver;
+  Parte -> ProcessoObserver;
+  RegistroAuditoria -> ProcessoObserver;
+
+  Nota [shape=note, fillcolor="#FFFFE0", fontsize=10, label="Integração:\lcada transição válida de um estado concreto\lchama Processo.setEstado(), que troca o estado\le notifica todos os ProcessoObserver registrados.\l"];
+  Nota -> Processo [style=dashed, arrowhead=none];
+}
